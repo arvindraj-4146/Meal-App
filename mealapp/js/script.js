@@ -14,21 +14,32 @@ async function fetchMealsFromApi(url,value) {
 
 // it show's all meals card in main acording to search input value
 function showMealList(){
+    // Fetching user input from an HTML input element with the ID "my-search"
     let inputValue = document.getElementById("my-search").value;
+    // Retrieving the 'favouritesList' from localStorage and parsing it into an array
     let arr=JSON.parse(localStorage.getItem("favouritesList"));
+    
+    // The API endpoint URL for meal search
     let url="https://www.themealdb.com/api/json/v1/1/search.php?s=";
+     // HTML variable to store the generated HTML content for displaying meals
     let html = "";
+    // Fetching meals from the API based on the input value
     let meals=fetchMealsFromApi(url,inputValue);
+    // Handling the promise from fetching meals from the API
     meals.then(data=>{
         if (data.meals) {
+            // If meals are found, iterate through each meal in the data
             data.meals.forEach((element) => {
                 let isFav=false;
+                // Checking if the meal ID exists in the 'favouritesList'
                 for (let index = 0; index < arr.length; index++) {
                     if(arr[index]==element.idMeal){
                         isFav=true;
                     }
                 }
+                // Creating HTML content for each meal card based on whether it's a favorite or not
                 if (isFav) {
+                    // If the meal is a favorite, construct HTML accordingly
                     html += `
                 <div id="card" class="card mb-3" style="width: 20rem;">
                     <img src="${element.strMealThumb}" class="card-img-top" alt="...">
@@ -42,6 +53,7 @@ function showMealList(){
                 </div>
                 `;
                 } else {
+                // If the meal is not a favorite, construct HTML accordingly
                     html += `
                 <div id="card" class="card mb-3" style="width: 20rem;">
                     <img src="${element.strMealThumb}" class="card-img-top" alt="...">
@@ -57,6 +69,7 @@ function showMealList(){
                 }  
             });
         } else {
+            // If no meals are found, display a 404 error message
             html += `
             <div class="page-wrap d-flex flex-row align-items-center">
                 <div class="container">
@@ -72,6 +85,7 @@ function showMealList(){
             </div>
             `;
         }
+         // Displaying the generated HTML content on the 'main' element in the DOM
         document.getElementById("main").innerHTML = html;
     });
 }
@@ -80,9 +94,13 @@ function showMealList(){
 
 //it  shows full meal details in main
 async function showMealDetails(id) {
+    // API endpoint URL for fetching meal details by ID
     let url="https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
+    // Initializing an empty HTML string
     let html="";
+    // Fetching meal details from the API based on the provided ID
     await fetchMealsFromApi(url,id).then(data=>{
+        // Constructing HTML content based on the retrieved meal details
         html += `
           <div id="meal-details" class="mb-5">
             <div id="meal-header" class="d-flex justify-content-around flex-wrap">
@@ -105,6 +123,7 @@ async function showMealDetails(id) {
           </div>
         `;
     });
+     // Displaying the constructed HTML content in the 'main' element of the document
     document.getElementById("main").innerHTML=html;
 }
 
@@ -113,10 +132,15 @@ async function showMealDetails(id) {
 
 // it shows all favourites meals in favourites body
 async function showFavMealList() {
+    // Retrieving the 'favouritesList' from localStorage and parsing it into an array
     let arr=JSON.parse(localStorage.getItem("favouritesList"));
+    // API endpoint URL for fetching meal details by ID
     let url="https://www.themealdb.com/api/json/v1/1/lookup.php?i=";
+    // Initializing an empty HTML string
     let html="";
+    // Checking if the 'favouritesList' is empty
     if (arr.length==0) {
+        // If 'favouritesList' is empty, display a message indicating no meals added to favorites
         html += `
             <div class="page-wrap d-flex flex-row align-items-center">
                 <div class="container">
@@ -132,8 +156,11 @@ async function showFavMealList() {
             </div>
             `;
     } else {
+        // If 'favouritesList' is empty, display a message indicating no meals added to favorites
         for (let index = 0; index < arr.length; index++) {
+            // Fetching meal details from the API based on the meal ID
             await fetchMealsFromApi(url,arr[index]).then(data=>{
+                // Constructing HTML content for each favorite meal
                 html += `
                 <div id="card" class="card mb-3" style="width: 20rem;">
                     <img src="${data.meals[0].strMealThumb}" class="card-img-top" alt="...">
@@ -149,6 +176,7 @@ async function showFavMealList() {
             });   
         }
     }
+    // Displaying the constructed HTML content in the element with the ID "favourites-body"
     document.getElementById("favourites-body").innerHTML=html;
 }
 
@@ -159,22 +187,30 @@ async function showFavMealList() {
 
 //it adds and remove meals to favourites list
 function addRemoveToFavList(id) {
+    // Retrieve the 'favouritesList' from localStorage and parse it into an array
     let arr=JSON.parse(localStorage.getItem("favouritesList"));
+    // Initialize a variable to track if the meal ID is already in the favorites list
     let contain=false;
+    // Check if the meal ID already exists in the favorites list
     for (let index = 0; index < arr.length; index++) {
         if (id==arr[index]) {
             contain=true;
         }
     }
+    // If the meal ID is in the favorites list
     if (contain) {
+        // Remove the meal from the favorites list by finding its index and splicing it out
         let number = arr.indexOf(id);
         arr.splice(number, 1);
         alert("your meal removed from your favourites list");
     } else {
+        // If the meal ID is not in the favorites list, add it to the list
         arr.push(id);
         alert("your meal add your favourites list");
     }
+    // Update the 'favouritesList' in localStorage with the updated array
     localStorage.setItem("favouritesList",JSON.stringify(arr));
-    showMealList();
-    showFavMealList();
+    // Call functions to update the displayed meal lists after the modification
+    showMealList(); //Function to update the main meal list display
+    showFavMealList(); // Function to update the favorites meal list display
 }
